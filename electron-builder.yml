@@ -1,0 +1,66 @@
+appId: com.aestheticy.app
+productName: Aestheticy
+copyright: Copyright © 2026 Mido
+artifactName: "Aestheticy Setup.${ext}"
+
+directories:
+  buildResources: build
+  output: release
+
+# Only the compiled output ships (dist = React UI, dist-electron = main + preload bundles).
+# `npm run dist:win` / build-windows.bat always run `vite build` + the esbuild bundle first.
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - electron/assets/**/*
+  - package.json
+  - "!**/*.map"
+
+# Executables can't be spawned from inside app.asar, so ffmpeg/ffprobe stay unpacked.
+asar: true
+asarUnpack:
+  - node_modules/ffmpeg-static/**
+  - node_modules/ffprobe-static/**
+
+win:
+  # Real, committed icon files (build/icon.ico + build/icon.png): nothing is converted from
+  # SVG at build time, which is what exhausted WebAssembly memory before.
+  icon: build/icon.ico
+  artifactName: "Aestheticy Setup.${ext}"
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Aestheticy
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  artifactName: "Aestheticy Setup.${ext}"
+  uninstallDisplayName: "Aestheticy Music Player"
+
+# "Open with" / double-click support for audio files in Windows Explorer.
+fileAssociations:
+  - ext: [mp3, aac, m4a, ogg, opus, wma]
+    name: Aestheticy Audio File
+    description: Audio file
+    icon: build/icon.ico
+  - ext: [flac, wav, aiff, aif, ape, wv, alac, dsf, dff]
+    name: Aestheticy Lossless Audio File
+    description: Lossless audio file
+    icon: build/icon.ico
+
+publish:
+  provider: github
+  owner: aestheticy
+  repo: aestheticy-desktop
+  releaseType: release
